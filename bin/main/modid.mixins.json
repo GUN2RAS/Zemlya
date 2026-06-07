@@ -1,0 +1,31 @@
+{
+  "required": true,
+  "package": "com.example.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "mixins": [
+    "CoreGravityMixin",
+    "EntityFluidInteractionGravityMixin",
+    "ServerGamePacketListenerGravityMixin",
+    "EntityShapeContextGravityMixin",
+    "PlayerEntityGravityMixin",
+    "LivingEntityGravityMixin",
+    "mob/AIEntityNavigationMixin",
+    "mob/AILookControlMixin",
+    "mob/AIMoveControlMixin",
+    "mob/AbstractSkeletonEntityGravityMixin",
+    "mob/DrownedEntityGravityMixin",
+    "mob/EndermanChasePlayerGoalGravityMixin",
+    "mob/EndermanEntityGravityMixin",
+    "mob/IllusionerEntityGravityMixin",
+    "mob/LookAtEntityGoalGravityMixin",
+    "mob/MobEntityGravityMixin",
+    "mob/RamImpactTaskGravityMixin",
+    "mob/SnowGolemEntityGravityMixin",
+    "mob/WitchEntityGravityMixin",
+    "mob/WitherEntityGravityMixin",
+    "mob/WolfBegGoalGravityMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

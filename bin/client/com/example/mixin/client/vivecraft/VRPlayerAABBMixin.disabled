@@ -1,0 +1,47 @@
+package com.example.mixin.client.vivecraft;
+
+import com.example.api.GravityChanger;
+import com.example.util.RotationUtil;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.Direction;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
+
+@Pseudo
+@Mixin(targets = "org.vivecraft.client_vr.gameplay.VRPlayer", remap = false)
+public class VRPlayerAABBMixin {
+
+    @ModifyVariable(method = "doPlayerMoveInRoom", at = @At(value = "STORE", ordinal = 0), name = "bb", remap = false)
+    private net.minecraft.world.phys.AABB modifyBB(net.minecraft.world.phys.AABB bb) {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc == null) return bb;
+        Entity cameraEntity = mc.getCameraEntity();
+        if (cameraEntity instanceof GravityChanger changer) {
+            Direction gravityDirection = changer.getGravityDirection().getAxisDirection();
+            if (gravityDirection != Direction.DOWN) {
+                if (gravityDirection == Direction.UP) {
+                    double height = bb.maxY - bb.minY;
+                    return new net.minecraft.world.phys.AABB(bb.minX, bb.minY - height, bb.minZ, bb.maxX, bb.minY, bb.maxZ);
+                }
+                double x = (bb.minX + bb.maxX) / 2.0;
+                double y = bb.minY;
+                double z = (bb.minZ + bb.maxZ) / 2.0;
+                double halfWidth = (bb.maxX - bb.minX) / 2.0;
+                double height = bb.maxY - bb.minY;
+                
+                AABB localBox = new AABB(-halfWidth, 0, -halfWidth, halfWidth, height, halfWidth);
+                AABB rotatedBox = RotationUtil.boxPlayerToWorld(localBox, gravityDirection);
+                
+                return new net.minecraft.world.phys.AABB(
+                    x + rotatedBox.minX, y + rotatedBox.minY, z + rotatedBox.minZ,
+                    x + rotatedBox.maxX, y + rotatedBox.maxY, z + rotatedBox.maxZ
+                );
+            }
+        }
+        return bb;
+    }
+}

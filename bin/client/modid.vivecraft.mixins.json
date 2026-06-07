@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "package": "com.example.mixin.vivecraft",
+  "compatibilityLevel": "JAVA_25",
+  "mixins": [
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

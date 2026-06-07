@@ -1,0 +1,26 @@
+{
+  "stats": {
+    "minecraft:dropped": {
+      "minecraft:short_grass": 1,
+      "minecraft:acacia_leaves": 1,
+      "minecraft:acacia_log": 1
+    },
+    "minecraft:custom": {
+      "minecraft:sprint_one_cm": 1268,
+      "minecraft:time_since_rest": 928,
+      "minecraft:walk_one_cm": 1552,
+      "minecraft:total_world_time": 974,
+      "minecraft:leave_game": 1,
+      "minecraft:fly_one_cm": 18653,
+      "minecraft:sneak_time": 8,
+      "minecraft:play_time": 928,
+      "minecraft:jump": 13,
+      "minecraft:time_since_death": 928,
+      "minecraft:drop": 3
+    },
+    "minecraft:used": {
+      "minecraft:acacia_leaves": 5
+    }
+  },
+  "DataVersion": 4788
+}

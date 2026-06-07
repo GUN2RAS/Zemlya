@@ -1,0 +1,25 @@
+{
+  "required": true,
+  "package": "com.example.mixin.client",
+  "compatibilityLevel": "JAVA_25",
+  "mixins": [
+  ],
+  "client": [
+    "BiomeEffectSoundPlayerMixin",
+    "CameraMixin",
+    "CameraShakeMixin",
+    "ClientPlayNetworkHandlerMixin",
+    "ClientPlayerEntityMixin",
+    "EntityRenderManagerMixin",
+    "EntityRenderStateMixin",
+    "EntityRendererMixin",
+    "ForceRenderRiftMixin",
+    "InGameOverlayRendererMixin",
+    "InventoryScreenRendererMixin",
+    "ItemPickupParticleMixin",
+    "PlayerEntityRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

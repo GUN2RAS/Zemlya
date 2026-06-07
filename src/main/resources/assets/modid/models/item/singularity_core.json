@@ -1,0 +1,8 @@
+{
+  "model": {
+    "type": "minecraft:item/generated",
+    "textures": {
+      "layer0": "minecraft:item/end_crystal"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+    "variants": {
+        "active=false": {
+            "model": "modid:block/elhombre_gravity_plate"
+        },
+        "active=true": {
+            "model": "modid:block/elhombre_gravity_plate_active"
+        }
+    }
+}

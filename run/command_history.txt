@@ -1,0 +1,39 @@
+/gravity up
+/gravity down
+/gravity up
+/gravity down
+/gravity west
+/gravity down
+/effect give Player985 minecraft:night_vision infinite
+/gravity up
+/gravity down
+/gravity up
+/gravity down
+/gravity up
+/effect give Player985 minecraft:night_vision infinite
+/effect give @p minecraft:night_vision infinite
+/gravity up
+/gravity down
+/gravity up
+/effect give @p minecraft:night_vision infinite
+/gravity up
+/gravity down
+/gravity up
+/gravity down
+/gravity up
+/gravity down
+/gravity up
+/gravity west
+/gravity down
+/gravity up
+/gravity west
+/gravity up
+/gravity west
+/gravity down
+/effect give @p minecraft:night_vision infinite
+/gravity up
+/effect give @p minecraft:night_vision infinite
+/gravity up
+/gravity west
+/gravity up
+/gravity down

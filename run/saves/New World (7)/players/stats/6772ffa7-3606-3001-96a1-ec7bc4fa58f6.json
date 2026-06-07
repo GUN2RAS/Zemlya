@@ -1,0 +1,23 @@
+{
+  "stats": {
+    "minecraft:dropped": {
+      "minecraft:wheat_seeds": 1,
+      "minecraft:oak_leaves": 2
+    },
+    "minecraft:picked_up": {
+      "minecraft:wheat_seeds": 1
+    },
+    "minecraft:custom": {
+      "minecraft:sprint_one_cm": 46,
+      "minecraft:time_since_rest": 976,
+      "minecraft:walk_one_cm": 3574,
+      "minecraft:total_world_time": 994,
+      "minecraft:leave_game": 1,
+      "minecraft:play_time": 976,
+      "minecraft:jump": 2,
+      "minecraft:time_since_death": 976,
+      "minecraft:drop": 3
+    }
+  },
+  "DataVersion": 4788
+}

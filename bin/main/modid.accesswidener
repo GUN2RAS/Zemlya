@@ -1,0 +1,12 @@
+accessWidener	v2	official
+
+# Sprinting particles method for ClientWorld
+accessible	method	net/minecraft/client/world/ClientWorld	addParticle	(Lnet/minecraft/particle/ParticleEffect;ZZDDDDDD)V
+
+# Entity.adjustMovementForCollisions(Vec3d) is private in 1.21.11
+accessible	method	net/minecraft/entity/Entity	adjustMovementForCollisions	(Lnet/minecraft/util/math/Vec3d;)Lnet/minecraft/util/math/Vec3d;
+
+# Entity protected methods needed by mixins
+accessible	method	net/minecraft/entity/Entity	fall	(DZLnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;)V
+accessible	method	net/minecraft/entity/Entity	updateSupportingBlockPos	(ZLnet/minecraft/util/math/Vec3d;)V
+accessible	method	net/minecraft/entity/Entity	tickInVoid	()V

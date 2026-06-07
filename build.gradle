@@ -1,0 +1,128 @@
+plugins {
+	id 'fabric-loom' version "${loom_version}"
+	id 'maven-publish'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+apply from: 'RemapCode.gradle'
+
+base {
+	archivesName = project.archives_base_name
+}
+
+repositories {
+	mavenLocal()
+	mavenCentral()
+	maven { url 'https://maven.wispforest.io/releases' }
+	maven { url 'https://jitpack.io/' }
+	maven { url 'https://api.modrinth.com/maven' }
+	maven { url 'https://maven.fabricmc.net/' }
+}
+
+loom {
+	mixin {
+		useLegacyMixinAp = false
+		defaultRefmapName = "zemlya-refmap.json"
+	}
+	splitEnvironmentSourceSets()
+
+	mods {
+		"zemlya" {
+			sourceSet sourceSets.main
+			sourceSet sourceSets.client
+		}
+	}
+
+	runs {
+		datagen {
+			server()
+			name "Data Generation"
+			vmArg "-Dfabric-api.datagen"
+			vmArg "-Dfabric-api.datagen.output-dir=${file("src/main/generated")}"
+			vmArg "-Dfabric-api.datagen.modid=zemlya"
+			vmArg "-Dfabric.addGameVersion=26.1.1"
+			ideConfigGenerated = true
+			runDir "build/datagen"
+		}
+	}
+}
+
+sourceSets {
+	main {
+		resources {
+			srcDirs += [
+					'src/main/generated'
+			]
+		}
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+}
+
+processResources {
+	inputs.property "version", project.version
+	duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
+	filesMatching("fabric.mod.json") {
+		expand "version": inputs.properties.version
+	}
+	
+	exclude "**/* *.ogg"
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 25
+}
+
+java {
+	withSourcesJar()
+
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
+}
+
+tasks.withType(Jar).configureEach {
+	duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+jar {
+	inputs.property "archivesName", project.base.archivesName
+}
+
+publishing {
+	publications {
+		create("mavenJava", MavenPublication) {
+			artifactId = project.archives_base_name
+			from components.java
+		}
+	}
+}
+
+tasks.register('deploy') {
+	doLast {
+		def targetDirs = [
+			"C:/Users/males/AppData/Roaming/PrismLauncher/instances/z/minecraft/mods",
+			"C:/Users/males/AppData/Roaming/PrismLauncher/instances/26.1.2(1)/minecraft/mods",
+			"C:/Users/males/AppData/Roaming/PrismLauncher/instances/gundonio/minecraft/mods"
+		]
+		targetDirs.each { targetDir ->
+			copy {
+				from(layout.buildDirectory.dir("libs"))
+				include("*.jar")
+				exclude("*-sources.jar", "*-dev.jar", "*-sources-dev.jar")
+				into(targetDir)
+			}
+		}
+	}
+}
+
+build.configure {
+	finalizedBy(deploy)
+}

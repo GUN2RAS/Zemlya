@@ -1,0 +1,22 @@
+{
+  "stats": {
+    "minecraft:used": {
+      "minecraft:skeleton_spawn_egg": 1
+    },
+    "minecraft:custom": {
+      "minecraft:sprint_one_cm": 22,
+      "minecraft:time_since_rest": 1250,
+      "minecraft:walk_one_cm": 2777,
+      "minecraft:total_world_time": 1266,
+      "minecraft:leave_game": 1,
+      "minecraft:fly_one_cm": 477,
+      "minecraft:crouch_one_cm": 38,
+      "minecraft:sneak_time": 14,
+      "minecraft:play_time": 1250,
+      "minecraft:damage_dealt": 188,
+      "minecraft:jump": 25,
+      "minecraft:time_since_death": 1250
+    }
+  },
+  "DataVersion": 4788
+}

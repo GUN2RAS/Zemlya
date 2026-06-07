@@ -1,0 +1,53 @@
+package com.example.mixin.client.vivecraft;
+
+import com.example.api.GravityChanger;
+import com.example.util.RotationUtil;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.core.Direction;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
+
+@Pseudo
+@Mixin(targets = "org.vivecraft.client_vr.gameplay.screenhandlers.GuiHandler", remap = false)
+public class GuiHandlerMixin {
+
+    private static Quaternionf getGravityRotationStatic() {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc == null) return new Quaternionf();
+        Entity cameraEntity = mc.getCameraEntity();
+        if (cameraEntity == null) cameraEntity = mc.player;
+        if (cameraEntity instanceof GravityChanger changer) {
+            Direction gravityDirection = changer.getGravityDirection().getAxisDirection();
+            Direction prevGravityDirection = changer.getPrevGravityDirection().getAxisDirection();
+            if (gravityDirection == Direction.DOWN && prevGravityDirection == Direction.DOWN) {
+                return new Quaternionf();
+            }
+            float progress = changer.getGravityTransitionProgress(mc.getRenderTickCounter().getTickProgress(true));
+            return RotationUtil.getInterpolatedWorldRotationQuaternion(gravityDirection, prevGravityDirection, progress);
+        }
+        return new Quaternionf();
+    }
+
+    @Redirect(
+        method = "applyGUIModelView", 
+        slice = @org.spongepowered.asm.mixin.injection.Slice(
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/Vec3;subtract(Lnet/minecraft/util/math/Vec3;)Lnet/minecraft/util/math/Vec3;", remap = true)
+        ),
+        at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;mul(Lorg/joml/Matrix4fc;)Lorg/joml/Matrix4f;", ordinal = 0, remap = false), 
+        remap = false
+    )
+    private static Matrix4f redirectGuiRotMul(Matrix4f instance, org.joml.Matrix4fc guirot) {
+        Quaternionf grav = getGravityRotationStatic();
+        if (grav.w != 1.0f || grav.x != 0.0f || grav.y != 0.0f || grav.z != 0.0f) {
+            // Apply gravity rotation to the GUI rotation so it aligns with the rotated world
+            return instance.mul(new Matrix4f().rotation(grav).mul(guirot));
+        }
+        return instance.mul(guirot);
+    }
+}

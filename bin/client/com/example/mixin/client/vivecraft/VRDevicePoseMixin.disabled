@@ -1,0 +1,121 @@
+package com.example.mixin.client.vivecraft;
+
+import com.example.api.GravityChanger;
+import com.example.util.RotationUtil;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.core.Direction;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.lang.reflect.Field;
+
+@Pseudo
+@Mixin(targets = "org.vivecraft.client_vr.VRData$VRDevicePose", remap = false)
+public abstract class VRDevicePoseMixin {
+
+    @Shadow(remap = false)
+    private Object data;
+
+    private Quaternionf getGravityRotation() {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc == null) return new Quaternionf();
+        Entity cameraEntity = mc.getCameraEntity();
+        if (cameraEntity == null) cameraEntity = mc.player;
+        if (cameraEntity instanceof GravityChanger changer) {
+            Direction gravityDirection = changer.getGravityDirection().getAxisDirection();
+            Direction prevGravityDirection = changer.getPrevGravityDirection().getAxisDirection();
+            if (gravityDirection == Direction.DOWN && prevGravityDirection == Direction.DOWN) {
+                return new Quaternionf();
+            }
+            float progress = changer.getGravityTransitionProgress(mc.getRenderTickCounter().getTickProgress(true));
+            return RotationUtil.getInterpolatedWorldRotationQuaternion(gravityDirection, prevGravityDirection, progress);
+        }
+        return new Quaternionf();
+    }
+
+    private Vec3 getOrigin() {
+        try {
+            Field originField = data.getClass().getDeclaredField("origin");
+            originField.setAccessible(true);
+            Object vec3Obj = originField.get(data);
+            if (vec3Obj instanceof net.minecraft.world.phys.Vec3 vec3) {
+                return new Vec3(vec3.x, vec3.y, vec3.z);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Vec3.ZERO;
+    }
+
+    @Inject(method = "getPosition", at = @At("RETURN"), cancellable = true, remap = false)
+    private void onGetPosition(CallbackInfoReturnable<net.minecraft.world.phys.Vec3> cir) {
+        Quaternionf grav = getGravityRotation();
+        if (grav.w != 1.0f || grav.x != 0.0f || grav.y != 0.0f || grav.z != 0.0f) {
+            net.minecraft.world.phys.Vec3 pos = cir.getReturnValue();
+            Vec3 origin = getOrigin();
+            Vector3f local = new Vector3f((float)(pos.x - origin.x), (float)(pos.y - origin.y), (float)(pos.z - origin.z));
+            local.rotate(grav);
+            cir.setReturnValue(new net.minecraft.world.phys.Vec3(origin.x + local.x, origin.y + local.y, origin.z + local.z));
+        }
+    }
+
+    @Inject(method = "getPositionF", at = @At("RETURN"), cancellable = true, remap = false)
+    private void onGetPositionF(CallbackInfoReturnable<Vector3f> cir) {
+        Quaternionf grav = getGravityRotation();
+        if (grav.w != 1.0f || grav.x != 0.0f || grav.y != 0.0f || grav.z != 0.0f) {
+            Vector3f pos = cir.getReturnValue();
+            Vec3 origin = getOrigin();
+            Vector3f local = new Vector3f((float)(pos.x - origin.x), (float)(pos.y - origin.y), (float)(pos.z - origin.z));
+            local.rotate(grav);
+            cir.setReturnValue(new Vector3f((float)origin.x + local.x, (float)origin.y + local.y, (float)origin.z + local.z));
+        }
+    }
+
+    @Inject(method = "getScalePositionOffset", at = @At("RETURN"), cancellable = true, remap = false)
+    private void onGetScalePositionOffset(float newWorldScale, CallbackInfoReturnable<Vector3f> cir) {
+        Quaternionf grav = getGravityRotation();
+        if (grav.w != 1.0f || grav.x != 0.0f || grav.y != 0.0f || grav.z != 0.0f) {
+            Vector3f offset = cir.getReturnValue();
+            offset.rotate(grav);
+            cir.setReturnValue(offset);
+        }
+    }
+
+    @Inject(method = "getDirection", at = @At("RETURN"), cancellable = true, remap = false)
+    private void onGetDirection(CallbackInfoReturnable<Vector3f> cir) {
+        Quaternionf grav = getGravityRotation();
+        if (grav.w != 1.0f || grav.x != 0.0f || grav.y != 0.0f || grav.z != 0.0f) {
+            Vector3f dir = cir.getReturnValue();
+            dir.rotate(grav);
+            cir.setReturnValue(dir);
+        }
+    }
+
+    @Inject(method = "getCustomVector", at = @At("RETURN"), cancellable = true, remap = false)
+    private void onGetCustomVector(org.joml.Vector3fc axis, CallbackInfoReturnable<Vector3f> cir) {
+        Quaternionf grav = getGravityRotation();
+        if (grav.w != 1.0f || grav.x != 0.0f || grav.y != 0.0f || grav.z != 0.0f) {
+            Vector3f vec = cir.getReturnValue();
+            vec.rotate(grav);
+            cir.setReturnValue(vec);
+        }
+    }
+
+    @Inject(method = "getMatrix", at = @At("RETURN"), cancellable = true, remap = false)
+    private void onGetMatrix(CallbackInfoReturnable<Matrix4f> cir) {
+        Quaternionf grav = getGravityRotation();
+        if (grav.w != 1.0f || grav.x != 0.0f || grav.y != 0.0f || grav.z != 0.0f) {
+            Matrix4f mat = new Matrix4f().rotation(grav).mul(cir.getReturnValue());
+            cir.setReturnValue(mat);
+        }
+    }
+}
