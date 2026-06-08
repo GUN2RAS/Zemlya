@@ -1,0 +1,67 @@
+package com.example.mixin.mob;
+
+import com.example.util.GravityHelper;
+import com.example.util.RotationUtil;
+import net.minecraft.world.entity.ai.control.LookControl;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.Optional;
+
+@Mixin(LookControl.class)
+public abstract class AILookControlMixin {
+    @Shadow
+    @Final
+    protected Mob mob;
+    @Shadow
+    protected double wantedX;
+    @Shadow
+    protected double wantedY;
+    @Shadow
+    protected double wantedZ;
+
+    @Inject(method = "getYRotD", at = @At("HEAD"), cancellable = true)
+    private void gravity$getYRotD(CallbackInfoReturnable<Optional<Float>> cir) {
+        Direction gravityDirection = GravityHelper.getGravityDirection(this.mob);
+        if (gravityDirection == Direction.DOWN)
+            return;
+
+        Vec3 diff = new Vec3(this.wantedX - this.mob.getX(), this.wantedY - this.mob.getEyeY(),
+                this.wantedZ - this.mob.getZ());
+        Vec3 localDiff = RotationUtil.vecWorldToPlayer(diff, gravityDirection);
+
+        if (Math.abs(localDiff.z) <= 1.0E-5 && Math.abs(localDiff.x) <= 1.0E-5) {
+            cir.setReturnValue(Optional.empty());
+        } else {
+            float yaw = (float) (Mth.atan2(localDiff.z, localDiff.x) * 57.2957763671875) - 90.0F;
+            cir.setReturnValue(Optional.of(yaw));
+        }
+    }
+
+    @Inject(method = "getXRotD", at = @At("HEAD"), cancellable = true)
+    private void gravity$getXRotD(CallbackInfoReturnable<Optional<Float>> cir) {
+        Direction gravityDirection = GravityHelper.getGravityDirection(this.mob);
+        if (gravityDirection == Direction.DOWN)
+            return;
+
+        Vec3 diff = new Vec3(this.wantedX - this.mob.getX(), this.wantedY - this.mob.getEyeY(),
+                this.wantedZ - this.mob.getZ());
+        Vec3 localDiff = RotationUtil.vecWorldToPlayer(diff, gravityDirection);
+        double horizontalDist = Math.sqrt(localDiff.x * localDiff.x + localDiff.z * localDiff.z);
+
+        if (Math.abs(localDiff.y) <= 1.0E-5 && horizontalDist <= 1.0E-5) {
+            cir.setReturnValue(Optional.empty());
+        } else {
+            cir.setReturnValue(
+                    Optional.of((float) (-(Mth.atan2(localDiff.y, horizontalDist) * 57.2957763671875))));
+        }
+    }
+}

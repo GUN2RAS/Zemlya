@@ -1,0 +1,99 @@
+package com.example.mixin.client.vivecraft;
+
+import com.example.api.GravityChanger;
+import com.example.util.RotationUtil;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.core.Direction;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.lang.reflect.Field;
+
+@Pseudo
+@Mixin(targets = "org.vivecraft.client_vr.gameplay.VRPlayer", remap = false)
+public abstract class VRPlayerMixin {
+
+    private static Quaternionf getGravityRotationStatic() {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc == null) return new Quaternionf();
+        Entity cameraEntity = mc.getCameraEntity();
+        if (cameraEntity == null) cameraEntity = mc.player;
+        if (cameraEntity instanceof GravityChanger changer) {
+            Direction gravityDirection = changer.getGravityDirection().getAxisDirection();
+            Direction prevGravityDirection = changer.getPrevGravityDirection().getAxisDirection();
+            if (gravityDirection == Direction.DOWN && prevGravityDirection == Direction.DOWN) {
+                return new Quaternionf();
+            }
+            float progress = changer.getGravityTransitionProgress(mc.getRenderTickCounter().getTickProgress(true));
+            return RotationUtil.getInterpolatedWorldRotationQuaternion(gravityDirection, prevGravityDirection, progress);
+        }
+        return new Quaternionf();
+    }
+
+    private static float getWorldScale(Object data) {
+        try {
+            Field f = data.getClass().getDeclaredField("worldScale");
+            f.setAccessible(true);
+            return f.getFloat(data);
+        } catch (Exception e) {
+            return 1.0f;
+        }
+    }
+
+    private static float getRotationRadians(Object data) {
+        try {
+            Field f = data.getClass().getDeclaredField("rotation_radians");
+            f.setAccessible(true);
+            return f.getFloat(data);
+        } catch (Exception e) {
+            return 0.0f;
+        }
+    }
+
+    private static Vec3 getOrigin(Object data) {
+        try {
+            Field f = data.getClass().getDeclaredField("origin");
+            f.setAccessible(true);
+            Object vec3Obj = f.get(data);
+            if (vec3Obj instanceof Vec3 vec3) {
+                return new Vec3(vec3.x, vec3.y, vec3.z);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Vec3.ZERO;
+    }
+
+    @Inject(method = "roomToWorldPos", at = @At("RETURN"), cancellable = true, remap = false)
+    private static void onRoomToWorldPos(org.joml.Vector3fc pos, Object data, CallbackInfoReturnable<Vec3> cir) {
+        Quaternionf grav = getGravityRotationStatic();
+        if (grav.w != 1.0f || grav.x != 0.0f || grav.y != 0.0f || grav.z != 0.0f) {
+            Vector3f out = pos.mul(getWorldScale(data), new Vector3f());
+            out.rotateY(getRotationRadians(data));
+            out.rotate(grav);
+            Vec3 origin = getOrigin(data);
+            cir.setReturnValue(new Vec3(origin.x + out.x, origin.y + out.y, origin.z + out.z));
+        }
+    }
+
+    @Inject(method = "worldToRoomPos", at = @At("HEAD"), cancellable = true, remap = false)
+    private static void onWorldToRoomPos(Vec3 pos, Object data, CallbackInfoReturnable<Vector3f> cir) {
+        Quaternionf grav = getGravityRotationStatic();
+        if (grav.w != 1.0f || grav.x != 0.0f || grav.y != 0.0f || grav.z != 0.0f) {
+            Vec3 origin = getOrigin(data);
+            Vector3f out = new Vector3f((float)(pos.x - origin.x), (float)(pos.y - origin.y), (float)(pos.z - origin.z));
+            Quaternionf invGrav = new Quaternionf(grav).conjugate();
+            out.rotate(invGrav);
+            out.div(getWorldScale(data));
+            out.rotateY(-getRotationRadians(data));
+            cir.setReturnValue(out);
+        }
+    }
+}

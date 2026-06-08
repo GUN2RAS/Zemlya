@@ -1,0 +1,32 @@
+package com.example.client.render;
+
+import com.example.entity.RiftMinionEntity;
+import net.minecraft.client.render.entity.BipedEntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.model.EntityModelLayers;
+import net.minecraft.client.render.entity.model.PlayerEntityModel;
+import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
+import net.minecraft.resources.ResourceLocation;
+
+public class RiftMinionEntityRenderer extends BipedEntityRenderer<RiftMinionEntity, PlayerEntityRenderState, PlayerEntityModel> {
+    private static final ResourceLocation TEXTURE = ResourceLocation.of("minecraft", "textures/entity/zombie/zombie.png"); // TODO: custom texture
+
+    public RiftMinionEntityRenderer(EntityRendererProvider.Context context) {
+        super(context, new PlayerEntityModel(context.getPart(EntityModelLayers.PLAYER), false), 0.5f);
+    }
+
+    @Override
+    public ResourceLocation getTexture(PlayerEntityRenderState state) {
+        return TEXTURE;
+    }
+
+    @Override
+    public PlayerEntityRenderState createRenderState() {
+        return new PlayerEntityRenderState();
+    }
+
+    @Override
+    public void updateRenderState(RiftMinionEntity entity, PlayerEntityRenderState state, float tickProgress) {
+        super.updateRenderState(entity, state, tickProgress);
+    }
+}

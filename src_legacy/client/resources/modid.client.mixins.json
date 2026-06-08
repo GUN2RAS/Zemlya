@@ -1,0 +1,23 @@
+{
+	"required": false,
+	"refmap": "modid.refmap.json",
+	"package": "com.example.mixin.client",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"CameraMixin",
+		"CameraShakeMixin",
+		"ClientPlayerEntityMixin",
+		"EntityRenderManagerMixin",
+		"EntityRenderStateMixin",
+		"EntityRendererMixin",
+		"PlayerEntityRendererMixin",
+		"ClientPlayNetworkHandlerMixin",
+		"ItemPickupParticleMixin",
+		"InventoryScreenRendererMixin",
+		"vivecraft.VRDevicePoseMixin",
+		"EndOcclusionMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}

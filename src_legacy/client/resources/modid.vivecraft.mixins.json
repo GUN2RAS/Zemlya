@@ -1,0 +1,22 @@
+{
+	"required": false,
+	"refmap": "modid.refmap.json",
+	"package": "com.example.mixin.client.vivecraft",
+	"compatibilityLevel": "JAVA_21",
+    "plugin": "com.example.mixin.VivecraftMixinPlugin",
+	"mixins": [
+		"VRDevicePoseMixin",
+		"VRPlayerMixin",
+		"VRPlayerAABBMixin",
+		"GuiHandlerMixin"
+	],
+	"client": [
+		"VRDevicePoseMixin",
+		"VRPlayerMixin",
+		"VRPlayerAABBMixin",
+		"GuiHandlerMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}
