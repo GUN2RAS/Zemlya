@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(value = RamTarget.class, priority = 1001)
 public abstract class RamImpactTaskGravityMixin {
 
-    @Shadow private Vec3 direction;
+    @Shadow private Vec3 ramDirection;
 
     @WrapOperation(
         method = "tick(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/animal/goat/Goat;J)V",
@@ -27,7 +27,7 @@ public abstract class RamImpactTaskGravityMixin {
             original.call(target, strength, x, z);
             return;
         }
-        Vec3 dir = com.example.api.physics.GravityCombat.transformKnockbackDir(this.direction, gd);
+        Vec3 dir = com.example.api.physics.GravityCombat.transformKnockbackDir(this.ramDirection, gd);
         original.call(target, strength, dir.x, dir.z);
     }
 }
