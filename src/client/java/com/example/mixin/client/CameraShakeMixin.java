@@ -2,8 +2,6 @@ package com.example.mixin.client;
 
 import com.example.util.CameraShakeTracker;
 import net.minecraft.client.Camera;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,15 +22,25 @@ public abstract class CameraShakeMixin {
     @Inject(method = "update", at = @At("RETURN"))
     private void applyShake(net.minecraft.client.DeltaTracker deltaTracker, CallbackInfo ci) {
         if (CameraShakeTracker.shakeIntensity > 0.0f) {
-            float strength = CameraShakeTracker.shakeIntensity;
-            float shakeX = (float) ((Math.random() - 0.5) * strength);
-            float shakeY = (float) ((Math.random() - 0.5) * strength);
+            float delta = deltaTracker.getGameTimeDeltaTicks();
+            CameraShakeTracker.shakeTime += delta;
 
-            this.setRotation(this.yRot + shakeX, this.xRot + shakeY);
-            
-            CameraShakeTracker.shakeIntensity -= 1.0f * deltaTracker.getGameTimeDeltaTicks();
-            if (CameraShakeTracker.shakeIntensity < 0.0f) {
+            float duration = 12.0f;
+            float progress = Math.min(1.0f, CameraShakeTracker.shakeTime / duration);
+
+            float envelope = (float) Math.sin(progress * Math.PI) * (1.0f - progress * 0.5f);
+            float strengthFactor = Math.min(CameraShakeTracker.maxIntensity, 15.0f) / 15.0f;
+
+            float pitchOffset = envelope * 3.5f * strengthFactor;
+            float subtleRoll = (float) Math.sin(progress * Math.PI * 2.0) * 0.5f * strengthFactor;
+
+            this.setRotation(this.yRot + subtleRoll, this.xRot + pitchOffset);
+
+            CameraShakeTracker.shakeIntensity -= 1.5f * delta;
+            if (CameraShakeTracker.shakeIntensity <= 0.0f || progress >= 1.0f) {
                 CameraShakeTracker.shakeIntensity = 0.0f;
+                CameraShakeTracker.maxIntensity = 1.0f;
+                CameraShakeTracker.shakeTime = 0.0f;
             }
         }
     }

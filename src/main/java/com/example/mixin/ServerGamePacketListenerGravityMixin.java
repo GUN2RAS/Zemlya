@@ -31,12 +31,7 @@ public abstract class ServerGamePacketListenerGravityMixin {
         )
     )
     private void gravity$onPlayerMove(ServerPlayer instance, MoverType type, Vec3 vec3d) {
-        Direction gravityDirection = GravityHelper.getGravityDirection(this.player);
-        if (gravityDirection == Direction.DOWN) {
-            instance.move(type, vec3d);
-            return;
-        }
-        instance.move(type, RotationUtil.vecWorldToPlayer(vec3d, gravityDirection));
+        instance.move(type, vec3d);
     }
 
     @Redirect(
@@ -47,12 +42,7 @@ public abstract class ServerGamePacketListenerGravityMixin {
         )
     )
     private void gravity$onVehicleMove(Entity instance, MoverType type, Vec3 vec3d) {
-        Direction gravityDirection = GravityHelper.getGravityDirection(this.player);
-        if (gravityDirection == Direction.DOWN) {
-            instance.move(type, vec3d);
-            return;
-        }
-        instance.move(type, RotationUtil.vecWorldToPlayer(vec3d, gravityDirection));
+        instance.move(type, vec3d);
     }
 
     @Redirect(
@@ -65,8 +55,7 @@ public abstract class ServerGamePacketListenerGravityMixin {
     private AABB gravity$isEntityOnAir(AABB instance, double x, double y, double z) {
         Direction gravityDirection = GravityHelper.getGravityDirection(this.player);
         if (gravityDirection != Direction.DOWN) {
-            Vec3 argVec = new Vec3(x, y, z);
-            argVec = RotationUtil.vecWorldToPlayer(argVec, gravityDirection);
+            Vec3 argVec = RotationUtil.vecPlayerToWorld(x, y, z, gravityDirection);
             return instance.expandTowards(argVec.x, argVec.y, argVec.z);
         }
         return instance.expandTowards(x, y, z);
